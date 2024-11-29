@@ -12,7 +12,7 @@ os.system('modprobe w1-therm')
 
 # Set up the location of the sensor in the system
 base_dir = '/sys/bus/w1/devices/'
-device_folder = glob.glob(base_dir + '28*')[0]
+device_folder = glob.glob(base_dir + '28-7d7c5e1f64ff')[0]
 device_file = device_folder + '/w1_slave'
 
 def read_temp_raw():
