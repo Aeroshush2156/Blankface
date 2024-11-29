@@ -1,12 +1,10 @@
 import os
 import glob
 import time
-import logging
+import tkinter as tk
+from tkinter import ttk
 
-# Setup basic logging
-logging.basicConfig(filename='temperature.log', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
-
-# Initialize the GPIO Pins
+# Setup for DS18B20 temperature sensor
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
 
@@ -31,17 +29,24 @@ def read_temp():
         temp_c = float(temp_string) / 1000.0
         return temp_c
 
-try:
-    while True:
-        temperature = read_temp()
-        if temperature:
-            print(f"Current temperature: {temperature} °C")
-            logging.info(f"Temperature reading: {temperature} °C")
-            # Very basic sleep interval of 1 minute for readings (customize as needed)
-            time.sleep(60)
-except KeyboardInterrupt:
-    print("Stopped by User")
-    logging.info("Temperature reading stopped by user.")
-except Exception as e:
-    print(f"Error: {str(e)}")
-    logging.error(f"Error when trying to read temperature: {str(e)}")
+def update_temperature():
+    temp = read_temp()
+    temperature_label.config(text=f"Temperature: {temp:.2f} °C")
+    root.after(1000, update_temperature)
+
+# GUI setup
+root = tk.Tk()
+root.title("Temperature Monitor")
+
+# Adding a frame for better layout management
+frame = ttk.Frame(root, padding="10 10 10 10")
+frame.grid(column=0, row=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+root.columnconfigure(0, weight=1)
+root.rowconfigure(0, weight=1)
+
+temperature_label = ttk.Label(frame, text="Temperature: -- °C")
+temperature_label.grid(column=1, row=1, sticky=(tk.W, tk.E))
+
+update_temperature()  # Initial call to start temperature updates
+
+root.mainloop()
