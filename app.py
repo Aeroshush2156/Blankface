@@ -46,9 +46,18 @@ def update_temperature():
     root.after(1000, update_temperature)
 
 def check_system_status(current_temp):
-    target = float(target_temp_entry.get()) if target_temp_entry.get() else None
+    target_input = target_temp_entry.get()  # Get the current input from the entry
+    if not target_input:  # Check if the entry is empty
+        status_label.config(text="Target temperature not set", foreground='orange')
+        return
 
-    if target is not None and isinstance(current_temp, (int, float)):
+    try:
+        target = float(target_input)  # Try to convert to float
+    except ValueError:
+        status_label.config(text="Invalid target temperature!", foreground='red')
+        return
+
+    if isinstance(current_temp, (int, float)):
         if current_temp < target:  # Heating needed
             GPIO.output(HEAT_PIN, GPIO.HIGH)
             GPIO.output(COOL_PIN, GPIO.LOW)
@@ -62,7 +71,7 @@ def check_system_status(current_temp):
             GPIO.output(COOL_PIN, GPIO.LOW)
             status_label.config(text="System is Idle", foreground='black')
     else:
-        status_label.config(text="Invalid target temperature!", foreground='red')
+        status_label.config(text="Invalid current temperature!", foreground='red')
 def set_target_temperature():
     try:
         target = float(target_temp_entry.get())
