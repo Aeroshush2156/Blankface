@@ -40,18 +40,30 @@ def read_temp():
 def update_temperature():
     temp = read_temp()
     temperature_label.config(text=f"Temperature: {temp:.2f} °C")
+    check_system_status(temp)
     root.after(1000, update_temperature)
+
+def check_system_status(current_temp):
+    target = float(target_temp_entry.get()) if target_temp_entry.get() else None
+
+    if target is not None:
+        if current_temp < target:  # Heating needed
+            GPIO.output(HEAT_PIN, GPIO.HIGH)
+            GPIO.output(COOL_PIN, GPIO.LOW)
+            status_label.config(text=f"System is Heating: {current_temp:.2f}/{target:.2f} °C", fg='red')
+        elif current_temp > target:  # Cooling needed
+            GPIO.output(COOL_PIN, GPIO.HIGH)
+            GPIO.output(HEAT_PIN, GPIO.LOW)
+            status_label.config(text=f"System is Cooling: {current_temp:.2f}/{target:.2f} °C", fg='blue')
+        else:  # System is idle
+            GPIO.output(HEAT_PIN, GPIO.LOW)
+            GPIO.output(COOL_PIN, GPIO.LOW)
+            status_label.config(text="System is Idle", fg='black')
 
 def set_target_temperature():
     try:
         target = float(target_temp_entry.get())
-        current_temp = read_temp()
-        if current_temp < target:  # Need heating
-            GPIO.output(HEAT_PIN, GPIO.HIGH)
-            GPIO.output(COOL_PIN, GPIO.LOW)
-        elif current_temp > target:  # Need cooling
-            GPIO.output(COOL_PIN, GPIO.HIGH)
-            GPIO.output(HEAT_PIN, GPIO.LOW)
+        check_system_status(read_temp())  # Check the system status with the current temperature.
     except ValueError:
         target_temp_entry.delete(0, tk.END)
         target_temp_entry.insert(0, "Invalid input, please enter a numeric value")
@@ -74,5 +86,12 @@ target_temp_entry.grid(column=1, row=2)
 set_temp_button = ttk.Button(frame, text="Set Target Temperature", command=set_target_temperature)
 set_temp_button.grid(column=1, row=3)
 
+# Status label to show current system status
+status_label = ttk.Label(frame, text="System Status: Idle", foreground="black")
+status_label.grid(column=1, row=4, sticky=(tk.W, tk.E))
+
 update_temperature()
 root.mainloop()
+
+# Cleanup GPIO on exit
+GPIO.cleanup()
