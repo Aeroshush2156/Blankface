@@ -52,17 +52,17 @@ def check_system_status(current_temp):
         if current_temp < target:  # Heating needed
             GPIO.output(HEAT_PIN, GPIO.HIGH)
             GPIO.output(COOL_PIN, GPIO.LOW)
-            status_label.config(text=f"System is Heating: {current_temp:.2f}/{target:.2f} °C", fg='red')
+            status_label.config(text=f"System is Heating: {current_temp:.2f}/{target:.2f} °C", foreground='red')
         elif current_temp > target:  # Cooling needed
             GPIO.output(COOL_PIN, GPIO.HIGH)
             GPIO.output(HEAT_PIN, GPIO.LOW)
-            status_label.config(text=f"System is Cooling: {current_temp:.2f}/{target:.2f} °C", fg='blue')
+            status_label.config(text=f"System is Cooling: {current_temp:.2f}/{target:.2f} °C", foreground='blue')
         else:  # System is idle
             GPIO.output(HEAT_PIN, GPIO.LOW)
             GPIO.output(COOL_PIN, GPIO.LOW)
-            status_label.config(text="System is Idle", fg='black')
+            status_label.config(text="System is Idle", foreground='black')
     else:
-        status_label.config(text="Invalid target temperature!", fg='red')
+        status_label.config(text="Invalid target temperature!", foreground='red')
 def set_target_temperature():
     try:
         target = float(target_temp_entry.get())
