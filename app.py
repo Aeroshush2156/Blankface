@@ -3,6 +3,14 @@ import glob
 import time
 import tkinter as tk
 from tkinter import ttk
+import RPi.GPIO as GPIO
+
+# Setup GPIO
+GPIO.setmode(GPIO.BCM)  # Use BCM pin numbering
+COOL_PIN = 27
+HEAT_PIN = 17
+GPIO.setup(COOL_PIN, GPIO.OUT, initial=GPIO.LOW)
+GPIO.setup(HEAT_PIN, GPIO.OUT, initial=GPIO.LOW)
 
 # Setup for DS18B20 temperature sensor
 os.system('modprobe w1-gpio')
@@ -34,11 +42,24 @@ def update_temperature():
     temperature_label.config(text=f"Temperature: {temp:.2f} °C")
     root.after(1000, update_temperature)
 
+def set_target_temperature():
+    try:
+        target = float(target_temp_entry.get())
+        current_temp = read_temp()
+        if current_temp < target:  # Need heating
+            GPIO.output(HEAT_PIN, GPIO.HIGH)
+            GPIO.output(COOL_PIN, GPIO.LOW)
+        elif current_temp > target:  # Need cooling
+            GPIO.output(COOL_PIN, GPIO.HIGH)
+            GPIO.output(HEAT_PIN, GPIO.LOW)
+    except ValueError:
+        target_temp_entry.delete(0, tk.END)
+        target_temp_entry.insert(0, "Invalid input, please enter a numeric value")
+
 # GUI setup
 root = tk.Tk()
 root.title("Temperature Monitor")
 
-# Adding a frame for better layout management
 frame = ttk.Frame(root, padding="10 10 10 10")
 frame.grid(column=0, row=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 root.columnconfigure(0, weight=1)
@@ -47,6 +68,11 @@ root.rowconfigure(0, weight=1)
 temperature_label = ttk.Label(frame, text="Temperature: -- °C")
 temperature_label.grid(column=1, row=1, sticky=(tk.W, tk.E))
 
-update_temperature()  # Initial call to start temperature updates
+target_temp_entry = ttk.Entry(frame)
+target_temp_entry.grid(column=1, row=2)
 
+set_temp_button = ttk.Button(frame, text="Set Target Temperature", command=set_target_temperature)
+set_temp_button.grid(column=1, row=3)
+
+update_temperature()
 root.mainloop()
