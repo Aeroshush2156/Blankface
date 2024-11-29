@@ -4,6 +4,8 @@ import time
 import tkinter as tk
 from tkinter import ttk
 import RPi.GPIO as GPIO
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Setup GPIO
 GPIO.setmode(GPIO.BCM)  # Use BCM pin numbering
@@ -15,13 +17,15 @@ GPIO.setup(HEAT_PIN, GPIO.OUT, initial=GPIO.LOW)
 # Setup for DS18B20 temperature sensor
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
-#test
-
-
 # Set up the location of the sensor in the system
 base_dir = '/sys/bus/w1/devices/'
 device_folder = glob.glob(base_dir + '28-7d7c5e1f64ff')[0]
 device_file = device_folder + '/w1_slave'
+
+# Lists for plotting temperature
+temperature_data = []
+time_data = []
+start_time = time.time()
 
 def read_temp_raw():
     with open(device_file, 'r') as f:
@@ -39,12 +43,28 @@ def read_temp():
         temp_c = float(temp_string) / 1000.0
         return temp_c
 
-def update_temperature():
-    # This function only reads the temperature and updates the GUI
+def update_temperature_plot():
+    global temperature_data, time_data
     temp = read_temp()
-    temperature_label.config(text=f"Temperature: {temp:.2f} °C")
-    # Keep the update loop for the current temperature read
-    root.after(1000, update_temperature)
+
+    # Update lists for plotting
+    temperature_data.append(temp)
+    elapsed_time = time.time() - start_time
+    time_data.append(elapsed_time / 60.0)  # time in minutes
+
+    # Clear the previous plot
+    ax.clear()
+    ax.plot(time_data, temperature_data, label='Temperature (°C)')
+    ax.set_xlabel('Time (minutes)')
+    ax.set_ylabel('Temperature (°C)')
+    ax.set_title('Temperature vs Time')
+    ax.legend()
+
+    # Refresh the canvas
+    canvas.draw()
+
+    # Schedule the next update of temperature
+    root.after(60000, update_temperature_plot)  # Update every minute
 
 def check_system_status(current_temp):
     target_input = target_temp_entry.get()  # Get the current input from the entry
@@ -73,6 +93,7 @@ def check_system_status(current_temp):
             status_label.config(text="System is Idle", foreground='black')
     else:
         status_label.config(text="Invalid current temperature!", foreground='red')
+
 def set_target_temperature():
     # This function gets called when the button is pressed
     try:
@@ -105,25 +126,35 @@ def set_target_temperature():
 root = tk.Tk()
 root.title("Temperature Monitor")
 
+# Create a frame for better layout management
 frame = ttk.Frame(root, padding="10 10 10 10")
 frame.grid(column=0, row=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 
+# Temperature Label
 temperature_label = ttk.Label(frame, text="Temperature: -- °C")
 temperature_label.grid(column=1, row=1, sticky=(tk.W, tk.E))
 
+# Target Temperature Entry
 target_temp_entry = ttk.Entry(frame)
 target_temp_entry.grid(column=1, row=2)
 
+# Set Temperature Button
 set_temp_button = ttk.Button(frame, text="Set Target Temperature", command=set_target_temperature)
 set_temp_button.grid(column=1, row=3)
 
-# Status label to show current system status
+# Status Label
 status_label = ttk.Label(frame, text="System Status: Idle", foreground="black")
 status_label.grid(column=1, row=4, sticky=(tk.W, tk.E))
 
-update_temperature()
+# Create Plot
+fig, ax = plt.subplots(figsize=(5, 3))  # Set the figure size
+canvas = FigureCanvasTkAgg(fig, master=root)  # Create a canvas to display the plot
+canvas.get_tk_widget().grid(column=0, row=5, sticky=(tk.W, tk.E))  # Add canvas to grid
+
+# Update the temperature and start plotting
+update_temperature_plot()  # Start updating the plot
 root.mainloop()
 
 # Cleanup GPIO on exit
