@@ -40,9 +40,10 @@ def read_temp():
         return temp_c
 
 def update_temperature():
+    # This function only reads the temperature and updates the GUI
     temp = read_temp()
     temperature_label.config(text=f"Temperature: {temp:.2f} °C")
-    check_system_status(temp)
+    # Keep the update loop for the current temperature read
     root.after(1000, update_temperature)
 
 def check_system_status(current_temp):
@@ -73,12 +74,14 @@ def check_system_status(current_temp):
     else:
         status_label.config(text="Invalid current temperature!", foreground='red')
 def set_target_temperature():
+    # This function gets called when the button is pressed
     try:
-        # Read the input from the Entry only when the button is pressed
+        # Read the input from the Entry when the button is pressed
         target = float(target_temp_entry.get())
 
-        # Update the system status with the current temperature value
-        current_temp = read_temp()  # Read the current temperature from the sensor
+        # Read the current temperature when the button is pressed
+        current_temp = read_temp()
+
         if current_temp < target:  # Heating needed
             GPIO.output(HEAT_PIN, GPIO.HIGH)
             GPIO.output(COOL_PIN, GPIO.LOW)
@@ -96,6 +99,7 @@ def set_target_temperature():
         target_temp_entry.delete(0, tk.END)
         target_temp_entry.insert(0, "Invalid input, please enter a numeric value")
         status_label.config(text="Invalid target temperature!", foreground='red')
+
 
 # GUI setup
 root = tk.Tk()
