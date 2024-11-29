@@ -74,11 +74,28 @@ def check_system_status(current_temp):
         status_label.config(text="Invalid current temperature!", foreground='red')
 def set_target_temperature():
     try:
+        # Read the input from the Entry only when the button is pressed
         target = float(target_temp_entry.get())
-        check_system_status(read_temp())  # Check the system status with the current temperature.
+
+        # Update the system status with the current temperature value
+        current_temp = read_temp()  # Read the current temperature from the sensor
+        if current_temp < target:  # Heating needed
+            GPIO.output(HEAT_PIN, GPIO.HIGH)
+            GPIO.output(COOL_PIN, GPIO.LOW)
+            status_label.config(text=f"System is Heating: {current_temp:.2f}/{target:.2f} °C", foreground='red')
+        elif current_temp > target:  # Cooling needed
+            GPIO.output(COOL_PIN, GPIO.HIGH)
+            GPIO.output(HEAT_PIN, GPIO.LOW)
+            status_label.config(text=f"System is Cooling: {current_temp:.2f}/{target:.2f} °C", foreground='blue')
+        else:  # System is idle
+            GPIO.output(HEAT_PIN, GPIO.LOW)
+            GPIO.output(COOL_PIN, GPIO.LOW)
+            status_label.config(text="System is Idle", foreground='black')
+
     except ValueError:
         target_temp_entry.delete(0, tk.END)
         target_temp_entry.insert(0, "Invalid input, please enter a numeric value")
+        status_label.config(text="Invalid target temperature!", foreground='red')
 
 # GUI setup
 root = tk.Tk()
