@@ -15,7 +15,7 @@ GPIO.setup(HEAT_PIN, GPIO.OUT, initial=GPIO.LOW)
 # Setup for DS18B20 temperature sensor
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
-
+#test
 
 
 # Set up the location of the sensor in the system
