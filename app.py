@@ -43,6 +43,8 @@ def read_temp():
         temp_c = float(temp_string) / 1000.0
         return temp_c
 
+
+
 def update_temperature_plot():
     global temperature_data, time_data
     temp = read_temp()
@@ -60,6 +62,8 @@ def update_temperature_plot():
     ax.set_title('Temperature vs Time')
     ax.legend()
 
+    # Adjust plot margins to prevent axis labels from getting cut off
+    plt.tight_layout(pad=3.0)  # Increase padding around the plot
     # Refresh the canvas
     canvas.draw()
 
@@ -126,32 +130,42 @@ def set_target_temperature():
 root = tk.Tk()
 root.title("Temperature Monitor")
 
+fig, ax = plt.subplots(figsize=(5, 3))  # Set figure size
+canvas = FigureCanvasTkAgg(fig, master=root)  # Create a canvas to display the plot
+
 # Create a frame for better layout management
 frame = ttk.Frame(root, padding="10 10 10 10")
 frame.grid(column=0, row=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-root.columnconfigure(0, weight=1)
-root.rowconfigure(0, weight=1)
+# Configure row and column weights
+root.columnconfigure(0, weight=1)  # Allow column to expand
+root.rowconfigure(0, weight=1)     # Allow row to expand
+frame.columnconfigure(0, weight=1)  # Center contents in frame
+frame.rowconfigure(0, weight=1)
 
-# Temperature Label
+
+# Adding the temperature label
 temperature_label = ttk.Label(frame, text="Temperature: -- °C")
-temperature_label.grid(column=1, row=1, sticky=(tk.W, tk.E))
+temperature_label.grid(column=0, row=1, sticky=(tk.N, tk.E, tk.W))
 
-# Target Temperature Entry
+
+# Entry for the target temperature
 target_temp_entry = ttk.Entry(frame)
-target_temp_entry.grid(column=1, row=2)
+target_temp_entry.grid(column=0, row=2, sticky=(tk.N, tk.E, tk.W))
+
 
 # Set Temperature Button
 set_temp_button = ttk.Button(frame, text="Set Target Temperature", command=set_target_temperature)
-set_temp_button.grid(column=1, row=3)
+set_temp_button.grid(column=0, row=3, sticky=(tk.N, tk.E, tk.W))
 
 # Status Label
 status_label = ttk.Label(frame, text="System Status: Idle", foreground="black")
-status_label.grid(column=1, row=4, sticky=(tk.W, tk.E))
+status_label.grid(column=0, row=4, sticky=(tk.N, tk.E, tk.W))
 
 # Create Plot
 fig, ax = plt.subplots(figsize=(5, 3))  # Set the figure size
-canvas = FigureCanvasTkAgg(fig, master=root)  # Create a canvas to display the plot
-canvas.get_tk_widget().grid(column=0, row=5, sticky=(tk.W, tk.E))  # Add canvas to grid
+canvas = FigureCanvasTkAgg(fig, master=root)
+canvas.get_tk_widget().grid(column=0, row=5, sticky=(tk.W, tk.E))  # Use sticky for center alignment
+
 
 # Update the temperature and start plotting
 update_temperature_plot()  # Start updating the plot
