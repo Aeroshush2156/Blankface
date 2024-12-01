@@ -17,22 +17,34 @@
     const temperatureChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: [], // Populate this with time data
+            labels: [],  // Will be populated with time data
             datasets: [{
                 label: 'Temperature (°C)',
-                data: [], // Populate this with temperature data
+                data: [],  // Will be populated with temperature data
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
             }]
         },
         options: {
             scales: {
-                y: {
-                    beginAtZero: true
-                }
+                y: { beginAtZero: true },
             }
         }
     });
+
+    // Function to fetch data and update the plot
+    function updatePlot() {
+        fetch('/api/data')
+            .then(response => response.json())
+            .then(data => {
+                temperatureChart.data.labels = data.time;  // Update labels with time data
+                temperatureChart.data.datasets[0].data = data.temperature;  // Update temperature data
+                temperatureChart.update();  // Refresh the chart
+            });
+    }
+
+    // Update the plot every minute
+    setInterval(updatePlot, 60000);  // Fetch new data every 60 seconds
 </script>
 </body>
 </html>

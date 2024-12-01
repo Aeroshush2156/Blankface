@@ -88,6 +88,17 @@ def get_temperature():
     current_temp = read_temp()
     return jsonify({'temperature': current_temp})  # Return temperature as JSON
 
+@app.route('/api/data')  # New endpoint for plotting
+def get_plot_data():
+    temp = read_temp()
+
+    # Append new readings
+    temperature_data.append(temp)
+    elapsed_time = time.time() - start_time
+    time_data.append(elapsed_time / 60.0)  # Append time in minutes
+
+    return jsonify({'time': time_data, 'temperature': temperature_data})  # Send both time and temperature data
+
 def run_flask():
     app.run(host='0.0.0.0', port=5001)  # Runs Flask on port 5001
 
