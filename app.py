@@ -6,6 +6,9 @@ from tkinter import ttk
 import RPi.GPIO as GPIO
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from flask import Flask, jsonify
+import threading
+
 
 # Setup GPIO
 GPIO.setmode(GPIO.BCM)  # Use BCM pin numbering
@@ -22,6 +25,8 @@ base_dir = '/sys/bus/w1/devices/'
 device_folder = glob.glob(base_dir + '28-7d7c5e1f64ff')[0]
 device_file = device_folder + '/w1_slave'
 
+# Flask setup
+app = Flask(__name__)
 # Lists for plotting temperature
 temperature_data = []
 time_data = []
@@ -72,6 +77,15 @@ def update_temperature_plot():
 
     # Schedule the next update of temperature
     root.after(60000, update_temperature_plot)  # Update every minute
+
+@app.route('/api/temperature')
+def get_temperature():
+    # Returns the current temperature as a JSON response
+    current_temp = read_temp()
+    return jsonify({'temperature': current_temp})
+
+def run_flask():
+    app.run(host='0.0.0.0', port=5001)  # Runs Flask on port 5001
 
 def check_system_status(current_temp):
     target_input = target_temp_entry.get()  # Get the current input from the entry
