@@ -6,7 +6,7 @@ from tkinter import ttk
 import RPi.GPIO as GPIO
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 import threading
 
 
@@ -79,10 +79,14 @@ def update_temperature_plot():
     root.after(60000, update_temperature_plot)  # Update every minute
 
 @app.route('/')
+def home():
+    current_temp = read_temp()  # Get the current temperature
+    return render_template('index.html', temperature=current_temp)  # Render the HTML template
+
+@app.route('/api/temperature')
 def get_temperature():
-    # Returns the current temperature as a JSON response
     current_temp = read_temp()
-    return jsonify({'temperature': current_temp})
+    return jsonify({'temperature': current_temp})  # Return temperature as JSON
 
 def run_flask():
     app.run(host='0.0.0.0', port=5001)  # Runs Flask on port 5001
