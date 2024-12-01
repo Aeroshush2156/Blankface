@@ -142,6 +142,15 @@ def set_target_temperature():
         target_temp_entry.insert(0, "Invalid input, please enter a numeric value")
         status_label.config(text="Invalid target temperature!", foreground='red')
 
+    finally:
+        # Ensure GPIO pins are cleaned up on exit
+        GPIO.cleanup()
+        print("GPIO cleanup done.")
+
+# Start the Flask server in a separate thread
+flask_thread = threading.Thread(target=run_flask)
+flask_thread.daemon = True  # Ensure the thread exits when the main program exits
+flask_thread.start()
 
 # GUI setup
 root = tk.Tk()
