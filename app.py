@@ -42,7 +42,10 @@ def read_temp():
         temp_string = temp_line[equals_pos + 2:]
         temp_c = float(temp_string) / 1000.0
         return temp_c
-
+def update_temperature():
+    temp = read_temp()  # Read the current temperature
+    temperature_label.config(text=f"Temperature: {temp:.2f} °C")  # Update the label
+    root.after(1000, update_temperature)  # Schedule this function to run again in 1 second
 
 
 def update_temperature_plot():
@@ -144,7 +147,7 @@ frame.rowconfigure(0, weight=1)
 
 
 # Adding the temperature label
-temperature_label = ttk.Label(frame, text="Temperature: -- °C")
+temperature_label = ttk.Label(frame, text="Temperature: ---°C")
 temperature_label.grid(column=0, row=1, sticky=(tk.N, tk.E, tk.W))
 
 
@@ -168,8 +171,10 @@ canvas.get_tk_widget().grid(column=0, row=5, sticky=(tk.W, tk.E))  # Use sticky 
 
 
 # Update the temperature and start plotting
+update_temperature()  # Initial call to start the process
 update_temperature_plot()  # Start updating the plot
-root.mainloop()
+
+root.mainloop() # Start the GUI event loop
 
 # Cleanup GPIO on exit
 GPIO.cleanup()
