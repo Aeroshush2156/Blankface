@@ -78,7 +78,7 @@ def update_temperature_plot():
     # Schedule the next update of temperature
     root.after(60000, update_temperature_plot)  # Update every minute
 
-@app.route('/api/temperature')
+@app.route('/')
 def get_temperature():
     # Returns the current temperature as a JSON response
     current_temp = read_temp()
