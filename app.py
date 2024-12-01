@@ -60,7 +60,7 @@ def update_temperature_plot():
     # Update lists for plotting
     temperature_data.append(temp)
     elapsed_time = time.time() - start_time
-    time_data.append(elapsed_time / 60.0)  # time in minutes
+    time_data.append(round(elapsed_time / 60.0, 1))  # Store elapsed time in minutes, rounded to 1 decimal place
 
     # Clear the previous plot
     ax.clear()
@@ -68,10 +68,22 @@ def update_temperature_plot():
     ax.set_xlabel('Time (minutes)')
     ax.set_ylabel('Temperature (°C)')
     ax.set_title('Temperature vs Time')
-    ax.legend()
 
-    # Adjust plot margins to prevent axis labels from getting cut off
-    plt.tight_layout(pad=3.0)  # Increase padding around the plot
+    # Control visibility of axis ticks
+    ax.tick_params(axis='both', direction='in', length=6, width=2)  # Optional: style the ticks
+
+    # Set the limits for y-axis to keep it visually sensible
+    ax.set_ylim(bottom=0)  # Start y-axis at 0 to avoid negative values unless you expect it
+
+    # Making sure x-axis is readable
+    ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))  # Show only integer values on x-axis
+
+    # Adjust layout to prevent labels from being cut off
+    plt.tight_layout(pad=3.0)
+
+    ax.legend()
+    ax.grid(True)
+
     # Refresh the canvas
     canvas.draw()
 
