@@ -67,32 +67,35 @@ def update_temperature_plot():
 
     # Clear the previous plot
     ax.clear()
-    ax.plot(time_data, temperature_data, label='Temperature (°C)')
-    ax.set_xlabel('Time (minutes)')
-    ax.set_ylabel('Temperature (°C)')
-    ax.set_title('Temperature vs Time')
 
-    # Control visibility of axis ticks
-    ax.tick_params(axis='both', direction='in', length=6, width=2)  # Optional: style the ticks
+    # Plot with improved formatting
+    ax.plot(time_data, temperature_data, label='Temperature (°C)', color='blue')
+    ax.set_xlabel('Time (minutes)', fontsize=12)  # Set x-label font size
+    ax.set_ylabel('Temperature (°C)', fontsize=12)  # Set y-label font size
+    ax.set_title('Temperature vs Time', fontsize=14)  # Title font size
 
-    # Set the limits for y-axis to keep it visually sensible
-    ax.set_ylim(bottom=0)  # Start y-axis at 0 to avoid negative values unless you expect it
+    # Control visibility and style of axis ticks
+    ax.tick_params(axis='both', direction='in', length=6, width=2)  # Style the ticks
 
-    # Making sure x-axis is readable
-    ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))  # Show only integer values on x-axis
-    ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{int(x)}'))  # Format x-axis in minutes as integers
+    # Setting y-axis limits
+    ax.set_ylim(bottom=0)  # Start y-axis at 0
 
-    # Adjust layout to prevent labels from being cut off
-    plt.tight_layout(pad=3.0)
+    # Making x-axis readable
+    ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))  # Show integer values on x-axis
+    ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{int(x)}'))  # Format x-axis in minutes
 
-    ax.legend()
+    # Add grid and legend
     ax.grid(True)
+    ax.legend()
+
+    # Adjusting margins to ensure labels are visible
+    plt.subplots_adjust(left=0.15, right=0.95, top=0.9, bottom=0.15)
 
     # Refresh the canvas
     canvas.draw()
 
     # Schedule the next update of temperature
-    root.after(20000, update_temperature_plot)  # Update every minute
+    root.after(60000, update_temperature_plot)  # Update every minute
 
 # Flask route to render the home page
 @app.route('/')
