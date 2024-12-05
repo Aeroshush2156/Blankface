@@ -175,7 +175,7 @@ def set_target_temperature(target):
     # This function gets called when the button is pressed
     global target_temperature
     try:
-        target_temperature = float(target_temp_entry.get())
+        target_temperature = float(target)
         current_temp = read_temp()
         check_system_status(current_temp)
 
