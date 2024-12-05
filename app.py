@@ -197,10 +197,14 @@ def set_target_temperature(target):
         target_temp_entry.insert(0, "Invalid input, please enter a numeric value")
         status_label.config(text="Invalid target temperature!", foreground='red')
 
-    finally:
-        # Ensure GPIO pins are cleaned up on exit
-        GPIO.cleanup()
-        print("GPIO cleanup done.")
+# Cleanup GPIO on exit
+def on_exit():
+    GPIO.cleanup()
+    print("GPIO cleanup done.")
+
+# Register the cleanup function to be called on exit
+import atexit
+atexit.register(on_exit)
 
 # GUI setup
 root = tk.Tk()
