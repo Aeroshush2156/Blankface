@@ -243,8 +243,8 @@ target_temp_entry = ttk.Entry(frame)
 target_temp_entry.grid(column=0, row=2, sticky=(tk.N, tk.E, tk.W))
 
 # Set Temperature Button
-set_temp_button = ttk.Button(frame, text="Set Target Temperature", command=set_target_temperature)
-set_temp_button.grid(column=0, row=3, sticky=(tk.N, tk.E, tk.W))
+set_temp_button = ttk.Button(frame, text="Set Target Temperature", command=lambda: set_target_temperature(target_temp_entry.get()))
+set_temp_button.grid(column=0, row=3, sticky=(tk.N, tk.E, tk.W))# Set Temperature Button
 
 # Status Label
 status_label = ttk.Label(frame, text="System Status: Idle", foreground="black")
