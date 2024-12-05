@@ -10,7 +10,7 @@ from flask import Flask, jsonify, render_template, request, redirect, url_for
 import threading
 
 # Setup GPIO
-GPIO.cleanup()  # Clean up any previous configurations
+#GPIO.cleanup()  # Clean up any previous configurations
 GPIO.setmode(GPIO.BCM)  # Use BCM pin numbering
 COOL_PIN = 27
 HEAT_PIN = 17
