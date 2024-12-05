@@ -10,11 +10,15 @@ from flask import Flask, jsonify, render_template, request, redirect, url_for
 import threading
 
 # Setup GPIO
+GPIO.cleanup()  # Clean up any previous configurations
 GPIO.setmode(GPIO.BCM)  # Use BCM pin numbering
 COOL_PIN = 27
 HEAT_PIN = 17
 GPIO.setup(COOL_PIN, GPIO.OUT, initial=GPIO.LOW)
 GPIO.setup(HEAT_PIN, GPIO.OUT, initial=GPIO.LOW)
+
+
+
 
 # Setup for DS18B20 temperature sensor
 os.system('modprobe w1-gpio')
