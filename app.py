@@ -130,12 +130,9 @@ def get_plot_data():
 target_temperature = None
 @app.route('/set_target_temperature', methods=['POST'])
 def set_target_temperature_web():
-    global target_temperature
-    try:
-        target_temperature = float(request.form['target_temp'])
-        return redirect(url_for('home'))
-    except ValueError:
-        return "Invalid input, please enter a numeric value", 400
+    target = request.form.get('target_temp')
+    set_target_temperature(target)  # Use the merged function
+    return redirect(url_for('home'))  # Redirect back to the home page
 
 
 # Function to run the Flask server
@@ -174,7 +171,7 @@ def check_system_status(current_temp):
 
 
 # Function to set the target temperature and update the system status
-def set_target_temperature():
+def set_target_temperature(target):
     # This function gets called when the button is pressed
     global target_temperature
     try:
