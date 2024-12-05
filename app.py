@@ -201,6 +201,10 @@ def set_target_temperature():
         GPIO.cleanup()
         print("GPIO cleanup done.")
 
+# GUI setup
+root = tk.Tk()
+root.title("Temperature Monitor")
+
 def update_gui_target_temperature():
     if target_temperature is not None:
         target_temp_entry.delete(0, tk.END)
@@ -215,9 +219,7 @@ flask_thread = threading.Thread(target=run_flask)
 flask_thread.daemon = True  # Ensure the thread exits when the main program exits
 flask_thread.start()
 
-# GUI setup
-root = tk.Tk()
-root.title("Temperature Monitor")
+
 
 fig, ax = plt.subplots(figsize=(5, 3))  # Set figure size
 canvas = FigureCanvasTkAgg(fig, master=root)  # Create a canvas to display the plot
