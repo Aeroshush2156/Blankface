@@ -27,7 +27,26 @@
         },
         options: {
             scales: {
-                y: { beginAtZero: true },
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Time (minutes)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value.toFixed(1);  // Format x-axis values to 1 decimal place
+                        }
+                    }
+                },
+                y: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Temperature (°C)'
+                    },
+                    beginAtZero: true
+                }
             }
         }
     });
