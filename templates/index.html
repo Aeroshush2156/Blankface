@@ -9,7 +9,11 @@
 <body>
 <h1>Temperature Monitor</h1>
 <p>Current Temperature: {{ temperature }} °C</p>
-
+<form action="/set_target_temperature" method="post">
+    <label for="target_temp">Set Target Temperature (°C):</label>
+    <input type="text" id="target_temp" name="target_temp" required>
+    <button type="submit">Set Target Temperature</button>
+</form>
 <canvas id="temperatureChart" width="400" height="200"></canvas>
 
 <script>

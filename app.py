@@ -6,7 +6,7 @@ from tkinter import ttk
 import RPi.GPIO as GPIO
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request, redirect, url_for
 import threading
 
 # Setup GPIO
@@ -101,7 +101,7 @@ def update_temperature_plot():
 @app.route('/')
 def home():
     current_temp = read_temp()  # Get the current temperature
-    return render_template('index.html', temperature=current_temp)  # Render the HTML template
+    return render_template('index.html', temperature=current_temp, target_temperature=target_temperature)  # Render the HTML template
 
 # Flask route to get the current temperature as JSON
 @app.route('/api/temperature')
@@ -120,6 +120,19 @@ def get_plot_data():
     time_data.append(elapsed_time / 60.0)  # Append time in minutes
 
     return jsonify({'time': time_data, 'temperature': temperature_data})  # Send both time and temperature data
+
+# Flask route to set the target temperature
+# Global variable for target temperature
+target_temperature = None
+@app.route('/set_target_temperature', methods=['POST'])
+def set_target_temperature_web():
+    global target_temperature
+    try:
+        target_temperature = float(request.form['target_temp'])
+        return redirect(url_for('home'))
+    except ValueError:
+        return "Invalid input, please enter a numeric value", 400
+
 
 # Function to run the Flask server
 def run_flask():
@@ -154,24 +167,25 @@ def check_system_status(current_temp):
     else:
         status_label.config(text="Invalid current temperature!", foreground='red')
 
+
+
 # Function to set the target temperature and update the system status
 def set_target_temperature():
     # This function gets called when the button is pressed
+    global target_temperature
     try:
-        # Read the input from the Entry when the button is pressed
-        target = float(target_temp_entry.get())
-
-        # Read the current temperature when the button is pressed
+        target_temperature = float(target_temp_entry.get())
         current_temp = read_temp()
+        check_system_status(current_temp)
 
-        if current_temp < target:  # Heating needed
+        if current_temp < target_temperature:  # Heating needed
             GPIO.output(HEAT_PIN, GPIO.HIGH)
             GPIO.output(COOL_PIN, GPIO.LOW)
-            status_label.config(text=f"System is Heating: {current_temp:.2f}/{target:.2f} °C", foreground='red')
-        elif current_temp > target:  # Cooling needed
+            status_label.config(text=f"System is Heating: {current_temp:.2f}/{target_temperature:.2f} °C", foreground='red')
+        elif current_temp > target_temperature:  # Cooling needed
             GPIO.output(COOL_PIN, GPIO.HIGH)
             GPIO.output(HEAT_PIN, GPIO.LOW)
-            status_label.config(text=f"System is Cooling: {current_temp:.2f}/{target:.2f} °C", foreground='blue')
+            status_label.config(text=f"System is Cooling: {current_temp:.2f}/{target_temperature:.2f} °C", foreground='blue')
         else:  # System is idle
             GPIO.output(HEAT_PIN, GPIO.LOW)
             GPIO.output(COOL_PIN, GPIO.LOW)
@@ -186,6 +200,15 @@ def set_target_temperature():
         # Ensure GPIO pins are cleaned up on exit
         GPIO.cleanup()
         print("GPIO cleanup done.")
+
+def update_gui_target_temperature():
+    if target_temperature is not None:
+        target_temp_entry.delete(0, tk.END)
+        target_temp_entry.insert(0, str(target_temperature))
+    root.after(1000, update_gui_target_temperature)  # Update every second
+
+# Call the function to start updating the GUI
+update_gui_target_temperature()
 
 # Start the Flask server in a separate thread
 flask_thread = threading.Thread(target=run_flask)
