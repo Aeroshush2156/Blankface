@@ -80,6 +80,7 @@ def update_temperature_plot():
 
     # Making sure x-axis is readable
     ax.xaxis.set_major_locator(plt.MaxNLocator(integer=True))  # Show only integer values on x-axis
+    ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{int(x)}'))  # Format x-axis in minutes as integers
 
     # Adjust layout to prevent labels from being cut off
     plt.tight_layout(pad=3.0)
@@ -91,7 +92,7 @@ def update_temperature_plot():
     canvas.draw()
 
     # Schedule the next update of temperature
-    root.after(60000, update_temperature_plot)  # Update every minute
+    root.after(20000, update_temperature_plot)  # Update every minute
 
 # Flask route to render the home page
 @app.route('/')
