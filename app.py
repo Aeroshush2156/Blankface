@@ -9,7 +9,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from flask import Flask, jsonify, render_template
 import threading
 
-
 # Setup GPIO
 GPIO.setmode(GPIO.BCM)  # Use BCM pin numbering
 COOL_PIN = 27
@@ -32,11 +31,13 @@ temperature_data = []
 time_data = []
 start_time = time.time()
 
+# Function to read raw temperature data from the sensor
 def read_temp_raw():
     with open(device_file, 'r') as f:
         valid, temp_line = f.readlines()
     return valid, temp_line
 
+# Function to read and parse the temperature from the sensor
 def read_temp():
     valid, temp_line = read_temp_raw()
     while not valid.strip().endswith('YES'):
@@ -47,12 +48,14 @@ def read_temp():
         temp_string = temp_line[equals_pos + 2:]
         temp_c = float(temp_string) / 1000.0
         return temp_c
+
+# Function to update the temperature label in the GUI
 def update_temperature():
     temp = read_temp()  # Read the current temperature
     temperature_label.config(text=f"Temperature: {temp:.2f} °C")  # Update the label
     root.after(1000, update_temperature)  # Schedule this function to run again in 1 second
 
-
+# Function to update the temperature plot in the GUI
 def update_temperature_plot():
     global temperature_data, time_data
     temp = read_temp()
@@ -90,16 +93,19 @@ def update_temperature_plot():
     # Schedule the next update of temperature
     root.after(60000, update_temperature_plot)  # Update every minute
 
+# Flask route to render the home page
 @app.route('/')
 def home():
     current_temp = read_temp()  # Get the current temperature
     return render_template('index.html', temperature=current_temp)  # Render the HTML template
 
+# Flask route to get the current temperature as JSON
 @app.route('/api/temperature')
 def get_temperature():
     current_temp = read_temp()
     return jsonify({'temperature': current_temp})  # Return temperature as JSON
 
+# Flask route to get the data for plotting as JSON
 @app.route('/api/data')  # New endpoint for plotting
 def get_plot_data():
     temp = read_temp()
@@ -111,9 +117,11 @@ def get_plot_data():
 
     return jsonify({'time': time_data, 'temperature': temperature_data})  # Send both time and temperature data
 
+# Function to run the Flask server
 def run_flask():
     app.run(host='0.0.0.0', port=5001)  # Runs Flask on port 5001
 
+# Function to check the system status and update the GUI accordingly
 def check_system_status(current_temp):
     target_input = target_temp_entry.get()  # Get the current input from the entry
     if not target_input:  # Check if the entry is empty
@@ -142,6 +150,7 @@ def check_system_status(current_temp):
     else:
         status_label.config(text="Invalid current temperature!", foreground='red')
 
+# Function to set the target temperature and update the system status
 def set_target_temperature():
     # This function gets called when the button is pressed
     try:
@@ -195,16 +204,13 @@ root.rowconfigure(0, weight=1)     # Allow row to expand
 frame.columnconfigure(0, weight=1)  # Center contents in frame
 frame.rowconfigure(0, weight=1)
 
-
 # Adding the temperature label
 temperature_label = ttk.Label(frame, text="Temperature: ---°C")
 temperature_label.grid(column=0, row=1, sticky=(tk.N, tk.E, tk.W))
 
-
 # Entry for the target temperature
 target_temp_entry = ttk.Entry(frame)
 target_temp_entry.grid(column=0, row=2, sticky=(tk.N, tk.E, tk.W))
-
 
 # Set Temperature Button
 set_temp_button = ttk.Button(frame, text="Set Target Temperature", command=set_target_temperature)
@@ -218,7 +224,6 @@ status_label.grid(column=0, row=4, sticky=(tk.N, tk.E, tk.W))
 fig, ax = plt.subplots(figsize=(5, 3))  # Set the figure size
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().grid(column=0, row=5, sticky=(tk.W, tk.E))  # Use sticky for center alignment
-
 
 # Update the temperature and start plotting
 update_temperature()  # Initial call to start the process
